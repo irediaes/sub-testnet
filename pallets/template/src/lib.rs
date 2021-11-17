@@ -27,6 +27,14 @@ pub enum Event<T: Config> {
 	ClaimRevoked(T::AccountId, Vec(u8)),
 }
 #[pallet::error]   // <-- Step 4. code block will replace this.
+pub enum Error<T> {
+	/// The proof has already been claimed
+	ProofAlreadyClaimed,
+	/// The proof doesn't exists
+	ProofNotFound,
+	/// The proof is claimed by another account, so caller can't revoke it.
+	ProofNotYours,
+}
 #[pallet::pallet]
 #[pallet::generate_store(pub(super) trait Store)]
 #[pallet::generate_storage_info]
