@@ -19,12 +19,12 @@ pub mod pallet {
 	// Event documentation should end with an array that provides descriptive names for parameters.
 	// https://docs.substrate.io/v3/runtime/events-and-errors
 	#[pallet::event] // <-- Step 3. code block will replace this.
-	#[pallet::generate_deposit(pub(sub) fn deposit_event)]
+	#[pallet::generate_deposit(pub(super) fn deposit_event)]
 	pub enum Event<T: Config> {
 		/// Event emitted when a proof has been claimed. [who, claim]
-		ClaimCreated(T::AccountId, Vec(u8)),
+		ClaimCreated(T::AccountId, Vec<u8>),
 		/// Event emitted when a claim is revoked by the owner. [who, claim]
-		ClaimRevoked(T::AccountId, Vec(u8)),
+		ClaimRevoked(T::AccountId, Vec<u8>),
 	}
 	#[pallet::error] // <-- Step 4. code block will replace this.
 	pub enum Error<T> {
@@ -37,7 +37,6 @@ pub mod pallet {
 	}
 	#[pallet::pallet]
 	#[pallet::generate_store(pub(super) trait Store)]
-	#[pallet::generate_storage_info]
 	pub struct Pallet<T>(_);
 
 	#[pallet::storage] // <-- Step 5. code block will replace this.
@@ -66,7 +65,7 @@ pub mod pallet {
 			let current_block = <frame_system::Pallet<T>>::block_number();
 
 			// Store the proof with the sender and block number
-			Proofs::<T>::insert(&proof, (&sender, block_number));
+			Proofs::<T>::insert(&proof, (&sender, current_block));
 
 			// Emit an event that the claim has been created
 			Self::deposit_event(Event::ClaimCreated(sender, proof));
@@ -82,7 +81,7 @@ pub mod pallet {
 			let sender = ensure_signed(origin)?;
 
 			// Verify that the specified proof has been claimed.
-			ensure!(Proofs::<T>::contains_key(proof), Error::<T>::ProofNotFound);
+			ensure!(Proofs::<T>::contains_key(&proof), Error::<T>::ProofNotFound);
 
 			// Get the owner of the claim
 			let (owner, _) = Proofs::<T>::get(&proof);
